@@ -16,4 +16,4 @@ Ce projet a été réalisé dans le cadre d'une formation en Mastère Ingénieri
 - [Dévelopeur 🧑‍💻](#dévelopeur-)
 
 # Dévelopeur 🧑‍💻
-- [Noé Garnier (Buldozer42)](https://www.github.com/Buldozer42)  
+- [Noé Garnier (Buldozer42)](https://www.github.com/Buldozer42)
