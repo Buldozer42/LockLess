@@ -71,13 +71,65 @@ const MailService = {
    * @param {string} title - Titre de la notification
    * @param {string} message - Message de la notification
    * @returns {Promise} - Promise contenant le résultat de l'envoi
-   */
-  sendNotification: async (email, title, message) => {
+   */  sendNotification: async (email, title, message) => {
     const subject = `LockLess - ${title}`;
     const text = `${message}\n\nCordialement,\nL'équipe LockLess`;
     const html = `
       <h1>${title}</h1>
       <p>${message}</p>
+      <p>Cordialement,<br>L'équipe LockLess</p>
+    `;
+
+    return MailService.sendEmail(email, subject, text, html);
+  },
+
+  /**
+   * Envoie un email de réinitialisation de mot de passe
+   * @param {string} email - Adresse email de l'utilisateur
+   * @param {string} username - Nom d'utilisateur
+   * @param {string} resetToken - Token de réinitialisation
+   * @param {string} resetUrl - URL de base pour la réinitialisation
+   * @returns {Promise} - Promise contenant le résultat de l'envoi
+   */
+  sendPasswordResetEmail: async (email, username, resetToken, resetUrl) => {
+    const resetLink = `${resetUrl}/reset-password/${resetToken}`;
+    const subject = 'LockLess - Réinitialisation de mot de passe';
+    const text = `Bonjour ${username},\n\n
+    Vous avez demandé une réinitialisation de votre mot de passe. Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe :\n\n
+    ${resetLink}\n\n
+    Ce lien est valide pendant 1 heure. Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email et votre mot de passe restera inchangé.\n\n
+    Cordialement,\nL'équipe LockLess`;
+    
+    const html = `
+      <h1>Réinitialisation de mot de passe</h1>
+      <p>Bonjour ${username},</p>
+      <p>Vous avez demandé une réinitialisation de votre mot de passe. Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe :</p>
+      <p><a href="${resetLink}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Réinitialiser mon mot de passe</a></p>
+      <p>Ou copiez ce lien dans votre navigateur :</p>
+      <p>${resetLink}</p>
+      <p>Ce lien est valide pendant 1 heure. Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email et votre mot de passe restera inchangé.</p>
+      <p>Cordialement,<br>L'équipe LockLess</p>
+    `;
+
+    return MailService.sendEmail(email, subject, text, html);
+  },
+
+  /**
+   * Envoie un email de confirmation de réinitialisation de mot de passe
+   * @param {string} email - Adresse email de l'utilisateur
+   * @param {string} username - Nom d'utilisateur
+   * @returns {Promise} - Promise contenant le résultat de l'envoi
+   */
+  sendPasswordResetConfirmationEmail: async (email, username) => {
+    const subject = 'LockLess - Confirmation de réinitialisation de mot de passe';
+    const text = `Bonjour ${username},\n\n
+    Nous confirmons que votre mot de passe a été réinitialisé avec succès. Si vous n'êtes pas à l'origine de cette action, veuillez nous contacter immédiatement.\n\n
+    Cordialement,\nL'équipe LockLess`;
+    
+    const html = `
+      <h1>Confirmation de réinitialisation de mot de passe</h1>
+      <p>Bonjour ${username},</p>
+      <p>Nous confirmons que votre mot de passe a été réinitialisé avec succès. Si vous n'êtes pas à l'origine de cette action, veuillez nous contacter immédiatement.</p>
       <p>Cordialement,<br>L'équipe LockLess</p>
     `;
 
