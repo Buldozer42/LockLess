@@ -1,13 +1,10 @@
 const express = require('express');
 const app = express();
-const cookieParser = require('cookie-parser');
 const { connectDB } = require('./service/db');
 const LoginService = require('./service/loginService');
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.urlencoded({ extended: true }));
-
-app.use(cookieParser());
 
 app.use(express.json());
 
@@ -19,13 +16,23 @@ app.get('/', (req, res) => {
 
 // Exemple of authenticate route
 app.get('/account', (req, res) => {
-  const token = req.cookies?.token || 'undefined';
-  console.log(req.cookies);
+  const token = req.headers.authorization.split(' ')[1];
   try {
     const userId = LoginService.tokenVerify(token);
     res.send('Authenticated user ID: ' + userId);
   } catch (error) {
     res.status(500).json({ error: 'Error getting account : ' + error.message });
+  }
+});
+
+// Exemple of authenticate route with roles restriction
+app.get('/admin', async (req, res) => {
+  const token = req.headers.authorization.split(' ')[1];
+  try {
+    const userId = await LoginService.tokenRoleVerify(token, 'admin');
+    res.send('Authenticated admin user ID: ' + userId);
+  } catch (error) {
+    res.status(500).json({ error: 'Error getting admin account : ' + error.message });
   }
 });
 
@@ -56,13 +63,14 @@ app.post('/register', async (req, res) => {
     res.status(500).json({ error: 'All field are required : firstName, lastName, email, password' });
   } else {
     try {
-      const user = await LoginService.register(
+      const {token, user} = await LoginService.register(
+        res,
         firstName,
         lastName,
         email,
         password
       );
-      res.status(201).json({ user });
+      res.status(201).json({ token, user });
     } catch (error) {
       res.status(500).json({ error: 'Error creating user : ' + error.message });
     }

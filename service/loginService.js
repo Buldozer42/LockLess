@@ -45,13 +45,14 @@ class LoginService {
 
     /**
      * Registers a new user by creating a new user object in the database.
+     * @param res - The response object to set the cookie.
      * @param firstName
      * @param lastName
      * @param email
      * @param password
      * @returns {Promise<User>} The created user object.
      */
-    static async register(firstName, lastName, email, password) {
+    static async register(res, firstName, lastName, email, password) {
         const hashedPassword = await this.hashPassword(password);
         const user = await UserService.createUser(
             firstName.toLowerCase(),
@@ -59,7 +60,19 @@ class LoginService {
             email,
             hashedPassword
         );
-        return user;
+        
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'prod',
+            sameSite: 'Strict',
+            maxAge: 60 * 60 * 1000, // 1h
+        });
+
+        return { token, user };
     }
 
     /**
@@ -86,6 +99,7 @@ class LoginService {
      * Verifies a JWT token and returns the user ID.
      * @param token
      * @returns {string} The user ID.
+     * @throws {Error} If the token is invalid.
      */
     static tokenVerify(token) {
         return jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -96,6 +110,21 @@ class LoginService {
         });
     }
 
+    /**
+     * Verifies a JWT token and checks if the user has a specific role.
+     * @param token
+     * @param role
+     * @returns {string} The user ID if the token is valid and the user has the specified role.
+     * @throws {Error} If the token is invalid or the user does not have the specified role.
+     */
+    static async tokenRoleVerify(token, role) {
+        const userId = this.tokenVerify(token);
+        const user = await UserService.getUserById(userId);
+        if (!user || !user.roles.includes(role)) {
+            throw new Error('Unauthorized');
+        }
+        return userId;
+    }
 }
 
 module.exports = LoginService;
