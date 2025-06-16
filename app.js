@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { connectDB } = require('./service/db');
 const LoginService = require('./service/loginService');
+const MailService = require('./service/mailService');
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.urlencoded({ extended: true }));
@@ -29,7 +30,7 @@ app.get('/account', (req, res) => {
 app.get('/admin', async (req, res) => {
   const token = req.headers.authorization.split(' ')[1];
   try {
-    const userId = await LoginService.tokenRoleVerify(token, 'admin');
+    const userId = LoginService.tokenRoleVerify(token, 'admin');
     res.send('Authenticated admin user ID: ' + userId);
   } catch (error) {
     res.status(500).json({ error: 'Error getting admin account : ' + error.message });

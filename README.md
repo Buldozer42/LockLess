@@ -13,7 +13,62 @@ Ce projet a été réalisé dans le cadre d'une formation en Mastère Ingénieri
 # Table des matières 
 - [LockLess 🐉](#lockless-)
 - [Table des matières](#table-des-matières)
+- [Installation 🚀](#installation-)
+- [Configuration ⚙️](#configuration-️)
+- [Lancement de l'application 🏁](#lancement-de-lapplication-)
+- [Routes API disponibles 🌐](#routes-api-disponibles-)
 - [Dévelopeur 🧑‍💻](#dévelopeur-)
+
+# Installation 🚀
+
+Assurez-vous d'avoir [Node.js](https://nodejs.org/) (version 14.x ou supérieure) et [MongoDB](https://www.mongodb.com/try/download/community) installés sur votre machine.
+
+1. Clonez ce dépôt :
+   ```bash
+   git clone https://github.com/Buldozer42/LockLess.git
+   cd lockless
+   ```
+
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
+
+# Configuration ⚙️
+
+1. Créez un fichier `.env` à la racine du projet avec les variables suivantes :
+   ```
+   DB_URI=mongodb://localhost:27017/lockless
+   JWT_SECRET=votre_secret_jwt_tres_securise
+   PORT=3000
+   ```
+
+# Lancement de l'application 🏁
+
+Pour démarrer le serveur en mode développement :
+
+```bash
+node app.js
+```
+
+L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
+
+# Routes API disponibles 🌐
+
+| Méthode | Route | Description | Corps de la requête |
+|---------|-------|-------------|---------------------|
+| GET | `/` | Page d'accueil | - |
+| POST | `/login` | Connexion utilisateur | `{ "email": "user@example.com", "password": "password" }` |
+| POST | `/register` | Inscription utilisateur | `{ "firstName": "John", "lastName": "Doe", "email": "user@example.com", "password": "password" }` |
+| GET | `/account` | Accéder à son compte (authentification requise) | - |
+| GET | `/admin` | Accès administrateur (rôle admin requis) | - |
+
+Pour les routes protégées, ajoutez le token JWT dans l'en-tête de la requête :
+```
+Authorization: Bearer votre_token_jwt
+```
 
 # Dévelopeur 🧑‍💻
 - [Noé Garnier (Buldozer42)](https://www.github.com/Buldozer42)
+- [Sandara Ly (Sly695)](https://github.com/Sly695)
+- [Francis Bleau (Volbix)](https://github.com/Volbix)
