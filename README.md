@@ -34,15 +34,6 @@ Assurez-vous d'avoir [Node.js](https://nodejs.org/) (version 14.x ou supérieure
    npm install
    ```
 
-# Configuration ⚙️
-
-1. Créez un fichier `.env` à la racine du projet avec les variables suivantes :
-   ```
-   DB_URI=mongodb://localhost:27017/lockless
-   JWT_SECRET=votre_secret_jwt_tres_securise
-   PORT=3000
-   ```
-
 # Lancement de l'application 🏁
 
 Pour démarrer le serveur en mode développement :
