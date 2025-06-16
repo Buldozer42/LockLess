@@ -17,6 +17,7 @@ Ce projet a été réalisé dans le cadre d'une formation en Mastère Ingénieri
 - [Lancement de l'application 🏁](#lancement-de-lapplication-)
 - [Routes API disponibles 🌐](#routes-api-disponibles-)
   - [Authentification](#authentification)
+- [Fixture](#fixture)
 - [Dévelopeur 🧑‍💻](#dévelopeur-)
 
 # Installation 🚀
@@ -63,6 +64,14 @@ L'application sera accessible à l'adresse [http://localhost:3000](http://localh
 Pour les routes protégées, ajoutez le token JWT dans l'en-tête de la requête :
 ```
 Authorization: Bearer votre_token_jwt
+```
+
+# Fixture
+
+Pour peupler la base de données avec des données de test, vous pouvez utiliser le script de fixture fourni. Exécutez la commande suivante :
+
+```bash
+npm run fixtures
 ```
 
 # Dévelopeur 🧑‍💻

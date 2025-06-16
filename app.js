@@ -5,7 +5,6 @@ const LoginService = require('./service/loginService');
 const UserService = require('./service/userService');
 const MailService = require('./service/mailService');
 
-// Middleware for parsing JSON and URL-encoded data
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());

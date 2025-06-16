@@ -7,5 +7,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.0",
     "nodemailer": "^7.0.3"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "fixtures": "node fixtures/index.js",
+    "fixtures:users": "node fixtures/userFixtures.js"
   }
 }
