@@ -12,6 +12,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "fixtures": "node fixtures/index.js",
-    "fixtures:users": "node fixtures/userFixtures.js"
+    "fixtures:users": "node fixtures/userFixtures.js",
+    "fixtures:lockers": "node fixtures/lockerFixtures.js",
+    "fixtures:bookings": "node fixtures/bookingFixtures.js"
   }
 }
