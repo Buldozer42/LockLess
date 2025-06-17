@@ -1,17 +1,17 @@
 const User = require('../entity/user');
 
 /**
- * Service class for managing user data.
+ * Service pour gérer les utilisateurs
  * @class
  */
 class UserService {
     /**
-     * Creates and saves a new user to the database.
-     * @param firstName
-     * @param lastName.
-     * @param email
-     * @param password
-     * @returns {Promise<User>} The created user object.
+     * Créer un nouvel utilisateur dans la base de données.
+     * @param firstName - Le prénom de l'utilisateur.
+     * @param lastName - Le nom de famille de l'utilisateur. 
+     * @param email - L'email de l'utilisateur.
+     * @param password - Le mot de passe de l'utilisateur.
+     * @returns {Promise<User>} L'utilisateur créé.
      */
     static async createUser(firstName, lastName, email, password) {
       const user = new User({
@@ -24,39 +24,39 @@ class UserService {
     }
   
     /**
-     * Gets all users from the database.
-     * @returns {Promise<User[]>} An array of user objects.
+     * Renvoie tous les utilisateurs de la base de données.
+     * @returns {Promise<User[]>}
      */
     static async getUsers() {
       return await User.find();
     }
   
     /**
-     * Gets a user by ID from the database.
-     * @param id
-     * @returns {Promise<User>} The user object.
+     * Récupère un utilisateur par son ID de la base de données.
+     * @param id - L'ID de l'utilisateur.
+     * @returns {Promise<User>}
      */
     static async getUserById(id) {
       return await User.findById(id);
     }
 
     /**
-     * Gets a user by email from the database.
-     * @param email
-     * @returns {Promise<User>} The user object.
+     * Récupère un utilisateur par son email de la base de données.
+     * @param email - L'email de l'utilisateur.
+     * @returns {Promise<User>}
      */
     static async getUserByEmail(email) {
       return await User.findOne({ email });
     }
   
     /**
-     * Updates a user in the database.
-     * @param id
-     * @param firstName
-     * @param lastName
-     * @param email
-     * @param password
-     * @returns {Promise<User>} The updated user object.
+     * Met à jour un utilisateur dans la base de données.
+     * @param id - L'ID de l'utilisateur à mettre à jour.
+     * @param firstName - Le prénom de l'utilisateur.
+     * @param lastName - Le nom de famille de l'utilisateur.
+     * @param email - L'email de l'utilisateur.
+     * @param password - Le mot de passe hashé de l'utilisateur.
+     * @returns {Promise<User>}
      */
     static async updateUser(id, firstName, lastName, email, password) {
       return await User.findByIdAndUpdate(
@@ -67,9 +67,9 @@ class UserService {
     }
   
     /**
-     * Deletes a user from the database.
-     * @param id
-     * @returns {Promise<User>} The deleted user object.
+     * Supprime un utilisateur de la base de données.
+     * @param id - L'ID de l'utilisateur à supprimer.
+     * @returns {Promise<User>}
      */
     static async deleteUser(id) {
       return await User.findByIdAndDelete(id);
@@ -77,7 +77,7 @@ class UserService {
 
     /**
      * Crée un token de réinitialisation de mot de passe pour un utilisateur.
-     * @param email - L'email de l'utilisateur
+     * @param email - L'email de l'utilisateur pour lequel le token est créé.
      * @returns {Promise<{user: User, resetToken: string}>} L'utilisateur et le token de réinitialisation
      */
     static async createPasswordResetToken(email) {
@@ -100,7 +100,7 @@ class UserService {
 
     /**
      * Vérifie si un token de réinitialisation est valide.
-     * @param token - Le token à vérifier
+     * @param token - Le token de réinitialisation à vérifier.
      * @returns {Promise<User>} L'utilisateur associé au token
      */
     static async verifyResetToken(token) {
@@ -118,8 +118,8 @@ class UserService {
 
     /**
      * Réinitialise le mot de passe d'un utilisateur avec un token valide.
-     * @param token - Le token de réinitialisation
-     * @param newPassword - Le nouveau mot de passe
+     * @param token - Le token de réinitialisation.
+     * @param newPassword - Le nouveau mot de passe de l'utilisateur.
      * @returns {Promise<User>} L'utilisateur mis à jour
      */
     static async resetPassword(token, newPassword) {

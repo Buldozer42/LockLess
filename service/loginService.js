@@ -3,16 +3,18 @@ const bcrypt = require('bcrypt');
 const UserService = require('./userService');
 
 /**
- * Service class for managing user authentication and authorization.
+ * Service pour gérer l'authentification et l'autorisation des utilisateurs.
  * @class
  */
 class LoginService {
     /**
-     * Logs in a user by validating their email and password.
-     * @param res - The response object to set the cookie.
-     * @param email
-     * @param password
-     * @returns {Promise<{token: string, user: User}>} The authentication token and user object.
+     * Authentifie l'utilisateur en vérifiant son email et son mot de passe.
+     * @param res - l'objet 'response' pour définir le cookie de session.
+     * @param email - L'email de l'utilisateur.
+     * @param password - Le mot de passe de l'utilisateur.
+     * @returns {Promise<{token: string, user: User}>} Un objet contenant le token JWT et l'utilisateur authentifié.
+     * @throws {Error} Si l'email ou le mot de passe est incorrect.
+     * @throws {Error} Si l'utilisateur n'existe pas.
      */
 
     static async login(res, email, password) {
@@ -36,21 +38,23 @@ class LoginService {
         return { token, user };
     }
 
+    /**
+     * Déconnecte l'utilisateur en supprimant le cookie de session.
+     * @param token - Le token JWT de l'utilisateur.
+     * @returns {Promise<{message: string}>} Un message de succès.
+     */
     static async logout(token) {
-        // Invalidate the token by removing it from the client side.
-        // This is usually done by deleting the token from local storage or cookies.
-        // No server-side action is needed for JWTs, as they are stateless.
         return { message: 'Logged out successfully' };
     }
 
     /**
-     * Registers a new user by creating a new user object in the database.
-     * @param res - The response object to set the cookie.
-     * @param firstName
-     * @param lastName
-     * @param email
-     * @param password
-     * @returns {Promise<User>} The created user object.
+     * Enregistre un nouvel utilisateur dans la base de données.
+     * @param res - l'objet 'response' pour définir le cookie de session.
+     * @param firstName - Le prénom de l'utilisateur.
+     * @param lastName - Le nom de famille de l'utilisateur.
+     * @param email - L'email de l'utilisateur.
+     * @param password - Le mot de passe de l'utilisateur.
+     * @returns {Promise<{token: string, user: User}>} Un objet contenant le token JWT et l'utilisateur créé.
      */
     static async register(res, firstName, lastName, email, password) {
         const hashedPassword = await this.hashPassword(password);
@@ -76,9 +80,9 @@ class LoginService {
     }
 
     /**
-     * Hashes a password using bcrypt.
-     * @param password
-     * @return {Promise<string>} The hashed password.
+     * Hash un mot de passe en utilisant bcrypt.
+     * @param password - Le mot de passe en clair à hacher.
+     * @return {Promise<string>} Le mot de passe haché.
      */
     static async hashPassword(password) {
         const salt = await bcrypt.genSalt(10);
@@ -86,20 +90,20 @@ class LoginService {
     }
   
     /**
-     * Compares a password with a hashed password.
-     * @param password  - The password to compare.
-     * @param hash - The hashed password to compare against.
-     * @return {Promise<boolean>} True if the password matches the hash, false otherwise.
+     * Compare un mot de passe en clair avec un mot de passe haché.
+     * @param password - Le mot de passe en clair à comparer.
+     * @param hash - Le mot de passe haché à comparer.
+     * @return {Promise<boolean>} Vrai si le mot de passe correspond au haché, faux sinon.
      */
     static async comparePassword(password, hash) {
         return await bcrypt.compare(password, hash);
     }
 
     /**
-     * Verifies a JWT token and returns the user ID.
-     * @param token
-     * @returns {string} The user ID.
-     * @throws {Error} If the token is invalid.
+     * Vérifie un token JWT et retourne l'ID de l'utilisateur.
+     * @param token - Le token JWT à vérifier.
+     * @returns {string} L'ID de l'utilisateur si le token est valide.
+     * @throws {Error} Si le token est invalide ou expiré.
      */
     static tokenVerify(token) {
         return jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
@@ -111,11 +115,11 @@ class LoginService {
     }
 
     /**
-     * Verifies a JWT token and checks if the user has a specific role.
-     * @param token
-     * @param role
-     * @returns {string} The user ID if the token is valid and the user has the specified role.
-     * @throws {Error} If the token is invalid or the user does not have the specified role.
+     * Vérifie un token JWT et s'assure que l'utilisateur a un rôle spécifique.
+     * @param token - Le token JWT à vérifier.
+     * @param role - Le rôle requis pour l'utilisateur.
+     * @returns {string} L'ID de l'utilisateur si le token est valide et l'utilisateur a le rôle spécifié.
+     * @throws {Error} Si le token est invalide, expiré ou si l'utilisateur n'a pas le rôle requis.
      */
     static async tokenRoleVerify(token, role) {
         const userId = this.tokenVerify(token);

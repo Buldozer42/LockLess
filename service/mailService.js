@@ -1,9 +1,7 @@
 const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
 
 /**
  * Configuration du transporteur pour l'envoi d'emails
- * Utilise les variables d'environnement pour les informations sensibles
  */
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST || 'smtp.gmail.com',

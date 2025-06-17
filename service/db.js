@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-// Connect to MongoDB using Mongoose
+// Connection a MongoDB avec Mongoose
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI).then(console.log('MongoDB connected'));
