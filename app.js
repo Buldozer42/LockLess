@@ -4,7 +4,15 @@ const { connectDB } = require('./service/db');
 const LoginService = require('./service/loginService');
 const UserService = require('./service/userService');
 const MailService = require('./service/mailService');
+const usersRoutes = require('./routes/users');
+const lockersRoutes = require('./routes/lockers');
+const bookingsRoutes = require('./routes/bookings');
 
+app.use(express.json());
+app.use('/user', usersRoutes);
+app.use('/locker', lockersRoutes);
+app.use('/booking', bookingsRoutes);
+// Middleware for parsing JSON and URL-encoded data
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
