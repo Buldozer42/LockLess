@@ -3,6 +3,7 @@ import Navbar from '../components/navbar.components';
 import Filter from '../components/filter.component';
 import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Modal, Box, Typography, IconButton, Divider } from '@mui/material';
 
@@ -79,7 +80,7 @@ function Home() {
     return (
         <>
             <Navbar />
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto p-6 bg-[#FDFFEF] ">
                 <h2 className="text-2xl font-semibold mb-4">Réservation de Casiers</h2>
                 <Filter onFilterChange={handleFilterChange} />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -109,47 +110,84 @@ function Home() {
                             </div>
                         );
                     })}
+                    {currentUser?.role === 'admin' && (
+                        <div
+                            className={`p-4 border-2 rounded-lg text-center transition font-medium relative cursor-pointers`}
+                        >
+                            <div className="flex justify-center items-center mb-2">
+                                <AddIcon className="mr-1" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {selectedLocker && (
                 <Modal open={true} onClose={() => setSelectedLocker(null)}>
                     <Box
-                        className="bg-white p-6 rounded shadow-lg"
+                        className="bg-white p-8 rounded-2xl shadow-2xl"
                         sx={{
                             position: 'absolute',
                             top: '50%',
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
-                            width: 300,
+                            width: 400,
                             outline: 'none'
                         }}
                     >
-                        <Typography variant="h6" gutterBottom>
-                            Détails du casier {selectedLocker.number}
+                        <Typography variant="h6" className="text-center font-bold mb-4 text-gray-800">
+                            Casier n°{selectedLocker.number}
                         </Typography>
-                        <Divider className="w-full my-10" />
-                        {currentUser?.role === 'admin' && activeOwner && (
-                            <Typography>Propriétaire : {activeOwner.prenom}</Typography>
-                        )}
-                        <Typography>Taille : {selectedLocker.size}</Typography>
-                        <Typography>Prix : {selectedLocker.price}</Typography>
-                        <Typography>Statut : {getLockerStatus(selectedLocker)}</Typography>
 
-                        <Box mt={3} display="flex" justifyContent="space-between">
+                        <Divider sx={{ my: 3 }} />
+
+                        <div className="space-y-4 text-sm">
+                            {currentUser?.role === 'admin' && activeOwner && (
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Propriétaire :</span>
+                                    <span className="text-gray-800 font-medium">{activeOwner.prenom}</span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Taille :</span>
+                                <span className="text-gray-800 font-medium">{selectedLocker.size}</span>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Prix :</span>
+                                <span className="text-gray-800 font-medium">{selectedLocker.price}€</span>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-500">Statut :</span>
+                                <span
+                                    className={`font-semibold px-3 py-1 rounded-full text-xs ${getLockerStatus(selectedLocker) === 'available'
+                                        ? 'bg-green-100 text-green-700'
+                                        : getLockerStatus(selectedLocker) === 'reserved'
+                                            ? 'bg-red-100 text-red-700'
+                                            : 'bg-gray-200 text-gray-600'
+                                        }`}
+                                >
+                                    {getLockerStatus(selectedLocker)}
+                                </span>
+                            </div>
+                        </div>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Box display="flex" justifyContent="flex-end" gap={2}>
                             {getLockerStatus(selectedLocker) === 'available' ? (
                                 <>
                                     <button
-                                        onClick={() => {
-                                            setSelectedLocker({ ...selectedLocker }); // simulate réservation ici
-                                        }}
-                                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                                        onClick={() => setSelectedLocker({ ...selectedLocker })}
+                                        className="bg-green-500 hover:bg-green-600 text-white text-sm px-5 py-2 rounded-md transition-all"
                                     >
                                         Réserver
                                     </button>
                                     <button
                                         onClick={() => setSelectedLocker(null)}
-                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm px-5 py-2 rounded-md transition-all"
                                     >
                                         Annuler
                                     </button>
@@ -157,14 +195,15 @@ function Home() {
                             ) : (
                                 <button
                                     onClick={() => setSelectedLocker(null)}
-                                    className="ml-auto bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm px-5 py-2 rounded-md transition-all"
                                 >
-                                    Annuler
+                                    Fermer
                                 </button>
                             )}
                         </Box>
                     </Box>
                 </Modal>
+
             )}
         </>
     );
