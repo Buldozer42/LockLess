@@ -1,7 +1,20 @@
 {
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mongoose": "^8.12.0"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.12.0",
+    "nodemailer": "^7.0.3",
+    "stripe": "^18.2.1"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "fixtures": "node fixtures/index.js",
+    "fixtures:users": "node fixtures/userFixtures.js",
+    "fixtures:lockers": "node fixtures/lockerFixtures.js",
+    "fixtures:bookings": "node fixtures/bookingFixtures.js"
   }
 }
