@@ -3,8 +3,8 @@ const reservations = [
     id: 1,
     lockerId: 3,
     ownerId: 101,
-    startDate: '2025-06-18',
-    endDate: '2025-06-22'
+    startDate: '2025-07-10',
+    endDate: '2025-07-22'
   },
   {
     id: 2,

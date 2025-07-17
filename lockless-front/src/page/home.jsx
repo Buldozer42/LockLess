@@ -5,16 +5,18 @@ import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Modal, Box, Typography, IconButton, Divider } from '@mui/material';
+import { Modal, Box, Typography, IconButton, Divider, Button, TextField, MenuItem } from '@mui/material';
 
 import users from '../data/userData';
 import initialLockers from '../data/initialLockers';
 import bookings from '../data/booking';
 
 function Home() {
-    const [lockers] = useState(initialLockers);
+    const [lockers, setLockers] = useState(initialLockers);
     const [filters, setFilters] = useState({ taille: '', prix: '', statut: '', numéro: '' });
     const [selectedLocker, setSelectedLocker] = useState(null);
+    const [editingLocker, setEditingLocker] = useState(null);
+    const [deletingLocker, setDeletingLocker] = useState(null);
 
     const currentUserId = 101;
     const currentUser = users.find((u) => u.id === currentUserId);
@@ -24,8 +26,6 @@ function Home() {
     };
 
     const getLockerStatus = (locker) => {
-        if (locker.disabled) return 'unavailable';
-
         const now = new Date();
         const relevantBookings = bookings.filter((b) => b.lockerId === locker.id);
 
@@ -35,6 +35,10 @@ function Home() {
             if (now >= start && now <= end) {
                 return 'reserved';
             }
+        }
+
+        if (locker.status === "unavailable") {
+            return 'unavailable';
         }
 
         return 'available';
@@ -58,29 +62,36 @@ function Home() {
         const dynamicStatus = getLockerStatus(locker);
         return (
             (!taille || locker.size === taille) &&
-            (!prix || locker.price === prix) &&
+            (!prix || locker.price === Number(prix)) &&
             (!statut || dynamicStatus === statut) &&
             (!numéro || locker.number === parseInt(numéro))
         );
     });
 
-    const matchingBooking = bookings.find((b) => b.lockerId === selectedLocker?.id);
-    const owner = users.find((u) => u.id === matchingBooking?.ownerId);
+    // Modal édition : handler champs
+    const handleEditChange = (field, value) => {
+        setEditingLocker((prev) => ({ ...prev, [field]: value }));
+    };
 
-    const now = new Date();
-    const activeBooking = bookings.find((b) => {
-        if (b.lockerId !== selectedLocker?.id) return false;
-        const start = new Date(b.startDate);
-        const end = new Date(b.endDate);
-        return now >= start && now <= end;
-    });
+    // Confirmer édition
+    const confirmEdit = () => {
+        setLockers((prev) =>
+            prev.map((locker) => (locker.id === editingLocker.id ? editingLocker : locker))
+        );
+        setEditingLocker(null);
+    };
 
-    const activeOwner = users.find((u) => u.id === activeBooking?.ownerId);
+    // Confirmer suppression
+    const confirmDelete = () => {
+        setLockers((prev) => prev.filter((locker) => locker.id !== deletingLocker.id));
+        setDeletingLocker(null);
+        if (selectedLocker?.id === deletingLocker.id) setSelectedLocker(null);
+    };
 
     return (
         <>
             <Navbar />
-            <div className="container mx-auto p-6 bg-[#FDFFEF] ">
+            <div className="container mx-auto p-6">
                 <h2 className="text-2xl font-semibold mb-4">Réservation de Casiers</h2>
                 <Filter onFilterChange={handleFilterChange} />
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -96,10 +107,22 @@ function Home() {
                             >
                                 {currentUser?.role === 'admin' && (
                                     <div className="absolute top-0 right-0 flex flex-col z-10">
-                                        <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingLocker(locker);
+                                            }}
+                                        >
                                             <EditIcon fontSize="small" />
                                         </IconButton>
-                                        <IconButton size="small" onClick={(e) => e.stopPropagation()}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDeletingLocker(locker);
+                                            }}
+                                        >
                                             <DeleteIcon fontSize="small" />
                                         </IconButton>
                                     </div>
@@ -111,9 +134,7 @@ function Home() {
                         );
                     })}
                     {currentUser?.role === 'admin' && (
-                        <div
-                            className={`p-4 border-2 rounded-lg text-center transition font-medium relative cursor-pointers`}
-                        >
+                        <div className={`p-4 border-2 rounded-lg text-center transition font-medium cursor-pointer`}>
                             <div className="flex justify-center items-center mb-2">
                                 <AddIcon className="mr-1" />
                             </div>
@@ -122,6 +143,7 @@ function Home() {
                 </div>
             </div>
 
+            {/* Modal détails casier */}
             {selectedLocker && (
                 <Modal open={true} onClose={() => setSelectedLocker(null)}>
                     <Box
@@ -132,7 +154,7 @@ function Home() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             width: 400,
-                            outline: 'none'
+                            outline: 'none',
                         }}
                     >
                         <Typography variant="h6" className="text-center font-bold mb-4 text-gray-800">
@@ -142,13 +164,6 @@ function Home() {
                         <Divider sx={{ my: 3 }} />
 
                         <div className="space-y-4 text-sm">
-                            {currentUser?.role === 'admin' && activeOwner && (
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Propriétaire :</span>
-                                    <span className="text-gray-800 font-medium">{activeOwner.prenom}</span>
-                                </div>
-                            )}
-
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Taille :</span>
                                 <span className="text-gray-800 font-medium">{selectedLocker.size}</span>
@@ -162,12 +177,13 @@ function Home() {
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-500">Statut :</span>
                                 <span
-                                    className={`font-semibold px-3 py-1 rounded-full text-xs ${getLockerStatus(selectedLocker) === 'available'
-                                        ? 'bg-green-100 text-green-700'
-                                        : getLockerStatus(selectedLocker) === 'reserved'
+                                    className={`font-semibold px-3 py-1 rounded-full text-xs ${
+                                        getLockerStatus(selectedLocker) === 'available'
+                                            ? 'bg-green-100 text-green-700'
+                                            : getLockerStatus(selectedLocker) === 'reserved'
                                             ? 'bg-red-100 text-red-700'
                                             : 'bg-gray-200 text-gray-600'
-                                        }`}
+                                    }`}
                                 >
                                     {getLockerStatus(selectedLocker)}
                                 </span>
@@ -203,7 +219,107 @@ function Home() {
                         </Box>
                     </Box>
                 </Modal>
+            )}
 
+            {/* Modal édition casier */}
+            {editingLocker && (
+                <Modal open={true} onClose={() => setEditingLocker(null)}>
+                    <Box
+                        className="bg-white p-8 rounded-2xl shadow-2xl"
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            outline: 'none',
+                        }}
+                    >
+                        <Typography variant="h6" className="text-center font-bold mb-4 text-gray-800">
+                            Modifier Casier n°{editingLocker.number}
+                        </Typography>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <TextField
+                            select
+                            label="Taille"
+                            fullWidth
+                            margin="normal"
+                            value={editingLocker.size}
+                            onChange={(e) => handleEditChange('size', e.target.value)}
+                        >
+                            <MenuItem value="small">Petit</MenuItem>
+                            <MenuItem value="medium">Moyen</MenuItem>
+                            <MenuItem value="large">Grand</MenuItem>
+                        </TextField>
+
+                        <TextField
+                            type="number"
+                            label="Prix (€)"
+                            fullWidth
+                            margin="normal"
+                            value={editingLocker.price}
+                            onChange={(e) => handleEditChange('price', Number(e.target.value))}
+                        />
+
+                        <TextField
+                            select
+                            label="Statut"
+                            fullWidth
+                            margin="normal"
+                            value={editingLocker.status}
+                            onChange={(e) => handleEditChange('status', e.target.value)}
+                        >
+                            <MenuItem value="available">Disponible</MenuItem>
+                            <MenuItem value="reserved">Réservé</MenuItem>
+                            <MenuItem value="unavailable">Indisponible</MenuItem>
+                        </TextField>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Box display="flex" justifyContent="flex-end" gap={2}>
+                            <Button variant="outlined" onClick={() => setEditingLocker(null)}>
+                                Annuler
+                            </Button>
+                            <Button variant="contained" onClick={confirmEdit}>
+                                Confirmer
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
+            )}
+
+            {/* Modal suppression casier */}
+            {deletingLocker && (
+                <Modal open={true} onClose={() => setDeletingLocker(null)}>
+                    <Box
+                        className="bg-white p-8 rounded-2xl shadow-2xl"
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 320,
+                            outline: 'none',
+                        }}
+                    >
+                        <Typography variant="h6" className="text-center font-bold mb-4 text-gray-800">
+                            Supprimer Casier n°{deletingLocker.number} ?
+                        </Typography>
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Box display="flex" justifyContent="center" gap={4}>
+                            <Button variant="outlined" onClick={() => setDeletingLocker(null)}>
+                                Annuler
+                            </Button>
+                            <Button variant="contained" color="error" onClick={confirmDelete}>
+                                Supprimer
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
             )}
         </>
     );
