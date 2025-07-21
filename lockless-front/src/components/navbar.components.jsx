@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton';
 import SideDrawer from './sidedrawer.components';
 import { useNavigate } from 'react-router-dom';
 
-
 function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerContent, setDrawerContent] = useState('');
@@ -21,6 +20,13 @@ function Navbar() {
     setDrawerContent('');
   };
 
+  const handleLogout = () => {
+    // ✅ Vider le token du localStorage
+    localStorage.removeItem('token');
+    // ✅ Rediriger vers "/"
+    navigate('/');
+  };
+
   return (
     <>
       <nav className="bg-gray-800 px-6 py-4">
@@ -30,7 +36,7 @@ function Navbar() {
             <IconButton onClick={() => openDrawer('account')}>
               <AccountCircleIcon className="text-white" />
             </IconButton>
-            <IconButton onClick={() => navigate('/')}>
+            <IconButton onClick={handleLogout}>
               <LogoutIcon className="text-white" />
             </IconButton>
           </div>
@@ -47,5 +53,4 @@ function Navbar() {
 }
 
 export default Navbar;
-
 
