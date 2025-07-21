@@ -90,7 +90,7 @@ const MailService = {
    * @returns {Promise} - Promise contenant le résultat de l'envoi
    */
   sendPasswordResetEmail: async (email, username, resetToken, resetUrl) => {
-    const resetLink = `${resetUrl}/reset-password/${resetToken}`;
+    const resetLink = `${resetUrl}/change-password/${resetToken}`;
     const subject = 'LockLess - Réinitialisation de mot de passe';
     const text = `Bonjour ${username},\n\n
     Vous avez demandé une réinitialisation de votre mot de passe. Veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe :\n\n

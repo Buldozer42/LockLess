@@ -19,9 +19,13 @@ class LoginService {
 
     static async login(res, email, password) {
         const user = await UserService.getUserByEmail(email);
+        if (!user) {
+            throw new Error('Utilisateur non trouvé');
+        }
+        
         const isPasswordCorrect = await this.comparePassword(password, user.password);
-        if (!user || !isPasswordCorrect) {
-            throw new Error('Invalid email or password');
+        if (!isPasswordCorrect) {
+            throw new Error('Mot de passe incorrect');
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

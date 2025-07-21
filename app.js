@@ -8,7 +8,14 @@ const usersRoutes = require('./routes/users');
 const lockersRoutes = require('./routes/lockers');
 const bookingsRoutes = require('./routes/bookings');
 const paymentsRoutes = require('./routes/payments');
+const cors = require('cors');
 
+app.use(cors());
+
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true, // si tu veux envoyer des cookies ou Authorization header
+}));
 // Configuration de l'endpoint webhook Stripe avant les middlewares JSON
 app.use('/payment/webhook', express.raw({ type: 'application/json' }));
 
@@ -19,8 +26,6 @@ app.use('/booking', bookingsRoutes);
 app.use('/payment', paymentsRoutes);
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.urlencoded({ extended: true }));
-
-app.use(express.json());
 
 connectDB().then(async () => {});
 
@@ -53,7 +58,7 @@ app.get('/admin', async (req, res) => {
 // Post route for login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  if (! email || ! password){
+  if (!email || !password){
     res.status(500).json({ error: 'All field are required : email, password'});
   } else {
     try {
@@ -105,7 +110,7 @@ app.post('/forgot-password', async (req, res) => {
     const { user, resetToken } = await UserService.createPasswordResetToken(email);
     
     // URL de base pour la réinitialisation (à ajuster selon votre frontend)
-    const resetUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = 'http://localhost:5173';
     
     // Envoyer l'email avec le lien de réinitialisation
     await MailService.sendPasswordResetEmail(
