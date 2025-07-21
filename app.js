@@ -110,7 +110,7 @@ app.post('/forgot-password', async (req, res) => {
     const { user, resetToken } = await UserService.createPasswordResetToken(email);
     
     // URL de base pour la réinitialisation (à ajuster selon votre frontend)
-    const resetUrl = 'http://localhost:5173';
+    const resetUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     
     // Envoyer l'email avec le lien de réinitialisation
     await MailService.sendPasswordResetEmail(
