@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/LockLess__1_-removebg-preview.png";
 import { Box, IconButton } from "@mui/material";
 
-function Navbar({ lockers, onBookingChange }) {
+function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isDrawerBookingOpen, setIsDrawerBookingOpen] = useState(false);
   const [drawerContent, setDrawerContent] = useState("");
@@ -83,15 +83,11 @@ function Navbar({ lockers, onBookingChange }) {
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
         content={drawerContent}
-        lockers={lockers}
-        onBookingChange={onBookingChange}
       />
       <SideBookingDrawer
         isOpen={isDrawerBookingOpen}
         onClose={closeDrawerBooking}
         content={drawerBookingContent}
-        lockers={lockers}
-        onBookingChange={onBookingChange}
       />
     </>
   );
