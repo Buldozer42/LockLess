@@ -36,7 +36,7 @@ function ChangePassword() {
         }
       } catch (err) {
         setTokenValid(false);
-        setError('Erreur réseau lors de la vérification du token');
+        setError(err, 'Erreur réseau lors de la vérification du token');
       }
     };
 
@@ -76,24 +76,42 @@ function ChangePassword() {
   };
 
   return (
-    <Container
-      maxWidth="xs"
+    <Box
       sx={{
-        height: '100vh',
+        minHeight: '100vh',
+        background: '#FDFFEF',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        p: 2,
       }}
     >
-      <Box
+      <Paper
+        elevation={6}
         sx={{
+          maxWidth: 420,
           width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          p: 4,
+          borderRadius: 3,
+          bgcolor: 'white',
         }}
       >
-        <Typography variant="h5" gutterBottom>
+        <Box
+          component="img"
+          src={logo}
+          alt="Logo"
+          sx={{
+            width: 120,
+            height: 'auto',
+            mb: 2,
+            display: 'block',
+            mx: 'auto',
+          }}
+        />
+        <Typography variant="h4" fontWeight="bold" align="center" gutterBottom>
+          Lockless
+        </Typography>
+        <Typography variant="h6" fontWeight="bold" align="center" gutterBottom>
           Réinitialiser le mot de passe
         </Typography>
 
@@ -104,7 +122,7 @@ function ChangePassword() {
         )}
 
         {tokenValid === false && (
-          <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+          <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
         )}
@@ -112,17 +130,17 @@ function ChangePassword() {
         {tokenValid && (
           <>
             {error && (
-              <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+              <Alert severity="error" sx={{ mt: 2 }}>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert severity="success" sx={{ mt: 2, width: '100%' }}>
+              <Alert severity="success" sx={{ mt: 2 }}>
                 {success}
               </Alert>
             )}
 
-            <Box component="form" sx={{ mt: 3, width: '100%' }} onSubmit={handleSubmit}>
+            <Box component="form" sx={{ mt: 3 }} onSubmit={handleSubmit}>
               <TextField
                 required
                 fullWidth
@@ -132,12 +150,22 @@ function ChangePassword() {
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                sx={{
+                  mt: 3,
+                  background: '#7ED956',
+                  color: 'white',
+                }}
+              >
                 Réinitialiser le mot de passe
               </Button>
 
-              <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
-                <Grid item>
+              <Grid container justifyContent="center" sx={{ mt: 2 }}>
+                <Typography variant="body2">
                   <Link
                     component="button"
                     variant="body2"
@@ -145,13 +173,13 @@ function ChangePassword() {
                   >
                     Retour à la connexion
                   </Link>
-                </Grid>
+                </Typography>
               </Grid>
             </Box>
           </>
         )}
-      </Box>
-    </Container>
+      </Paper>
+    </Box>
   );
 }
 

@@ -38,7 +38,7 @@ async function loadLockerFixtures() {
       {
         number: 'C001',
         size: 'large',
-        state: 'available',
+        state: 'reserved',
         price: 12
       },
       {

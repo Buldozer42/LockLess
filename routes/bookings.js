@@ -12,12 +12,13 @@ router.post('/', auth, async (req, res) => {
 
         if (booking) {
             // Mettre à jour le locker concerné
-            await Lockers.findByIdAndUpdate(
+            const changeStatus = await Lockers.findByIdAndUpdate(
                 booking.lockerId,
                 { state: 'reserved' }
             );
 
-            res.status(201).json(booking);
+
+            res.status(201).json({booking , changeStatus});
         }
     } catch (error) {
         res.status(500).json({ error: 'Erreur lors de la création de la réservation', details: error.message });
