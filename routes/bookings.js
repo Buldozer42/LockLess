@@ -64,9 +64,27 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 // Supprimer une réservation
+// Supprimer une réservation et libérer le casier
 router.delete("/:id", auth, async (req, res) => {
-  await Bookings.findByIdAndDelete(req.params.id);
-  res.json({ message: "Réservation supprimée" });
+  try {
+    // Trouver la réservation à supprimer
+    const booking = await Bookings.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: "Réservation non trouvée" });
+    }
+
+    // Mettre à jour le casier correspondant en "available"
+    await Lockers.findByIdAndUpdate(booking.lockerId._id, { state: "available" });
+
+    // Supprimer la réservation
+    await Bookings.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Réservation supprimée et casier libéré" });
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
 });
+
 
 module.exports = router;

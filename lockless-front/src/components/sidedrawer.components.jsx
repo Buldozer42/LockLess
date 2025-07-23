@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Drawer, Box, Typography, Avatar, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-function SideDrawer({ isOpen, onClose, content }) {
+function SideDrawer({ isOpen, onClose, content, lockers, onBookingChange }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [userBooking, setUserBooking] = useState([]);
@@ -20,7 +20,7 @@ function SideDrawer({ isOpen, onClose, content }) {
     } else {
       navigate("/"); // Redirection si pas d'user
     }
-  }, [navigate]);
+  }, [navigate, lockers]);
 
   const getUserBookings = async () => {
     try {
@@ -66,6 +66,7 @@ function SideDrawer({ isOpen, onClose, content }) {
       });
       // Mettre à jour la liste localement
       setUserBooking((prev) => prev.filter((b) => b._id !== bookingId));
+      onBookingChange();
     } catch (error) {
       console.error("Erreur lors de l'annulation :", error);
     }
@@ -112,7 +113,6 @@ function SideDrawer({ isOpen, onClose, content }) {
               <ul className="w-full space-y-2 cursor-pointer">
                 {userBooking.map((resa) => {
                   const statut = getBookingStatus(resa.startDate, resa.endDate);
-
                   return (
                     <li
                       key={resa.id || resa._id} // ⚠️ Prend _id si pas de id

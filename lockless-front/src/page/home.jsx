@@ -34,6 +34,7 @@ function Home() {
   const [addingLocker, setAddingLocker] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [refreshBooking, setRefreshBooking] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -50,7 +51,7 @@ function Home() {
       .then((res) => res.json())
       .then((data) => setLockers(data))
       .catch((err) => console.error("Erreur chargement casiers", err));
-  }, [navigate, token]);
+  }, [navigate, token, refreshBooking]);
 
   const handleFilterChange = useCallback((newFilters) => {
     setFilters(newFilters);
@@ -164,7 +165,7 @@ function Home() {
       setAddingLocker(false);
       setNewLocker({ number: "", size: "small", price: 0, state: "available" });
     } catch (error) {
-        toast.error(error.message || "Erreur inconnue lors de l'ajout");
+      toast.error(error.message || "Erreur inconnue lors de l'ajout");
     }
   };
 
@@ -261,7 +262,7 @@ function Home() {
 
   return (
     <>
-      <Navbar />
+      <Navbar lockers={lockers} onBookingChange={() => setRefreshBooking(prev => !prev)} />
       <div className="container mx-auto p-6">
         <h2 className="text-2xl font-semibold mb-4">Réservation de Casiers</h2>
         <Filter onFilterChange={handleFilterChange} />
@@ -321,30 +322,31 @@ function Home() {
       {addingLocker && (
         <Modal open={true} onClose={() => setAddingLocker(false)}>
           <Box
-            className="bg-white p-8 rounded-2xl shadow-2xl"
+            className="bg-white p-10 rounded-3xl shadow-lg"
             sx={{
               position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 400,
+              width: 420,
+              maxWidth: "90vw",
               outline: "none",
             }}
           >
             <Typography
-              variant="h6"
-              className="text-center font-bold mb-4 text-gray-800"
+              variant="h5"
+              className="text-center font-semibold mb-6 text-gray-900"
             >
               Ajouter un nouveau Casier
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
             <TextField
               type="number"
               label="Numéro"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={newLocker.number}
               onChange={(e) =>
                 handleEditChange("number", Number(e.target.value))
@@ -355,9 +357,10 @@ function Home() {
               select
               label="Taille"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={newLocker.size}
               onChange={(e) => handleEditChange("size", e.target.value)}
+              sx={{ mt: 2 }}
             >
               <MenuItem value="small">Petit</MenuItem>
               <MenuItem value="medium">Moyen</MenuItem>
@@ -368,33 +371,58 @@ function Home() {
               type="number"
               label="Prix (€)"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={newLocker.price}
               onChange={(e) =>
                 handleEditChange("price", Number(e.target.value))
               }
+              sx={{ mt: 2 }}
             />
 
             <TextField
               select
               label="Statut"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={newLocker.state}
               onChange={(e) => handleEditChange("state", e.target.value)}
+              sx={{ mt: 2 }}
             >
               <MenuItem value="available">Disponible</MenuItem>
-              <MenuItem value="reserved">Réservé</MenuItem>
               <MenuItem value="unavailable">Indisponible</MenuItem>
             </TextField>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
-            <Box display="flex" justifyContent="flex-end" gap={2}>
-              <Button variant="outlined" onClick={() => setAddingLocker(false)}>
+            <Box className="flex justify-end gap-4">
+              <Button
+                variant="outlined"
+                onClick={() => setAddingLocker(false)}
+                className="normal-case px-6"
+                sx={{
+                  borderColor: "#cbd5e1",
+                  color: "#64748b",
+                  "&:hover": {
+                    borderColor: "#94a3b8",
+                    backgroundColor: "#f1f5f9",
+                  },
+                }}
+              >
                 Annuler
               </Button>
-              <Button variant="contained" onClick={handleAdd}>
+              <Button
+                variant="contained"
+                onClick={handleAdd}
+                className="normal-case px-6"
+                sx={{
+                  backgroundColor: "#7ED956",
+                  color: "#fff",
+                  fontWeight: 600,
+                  "&:hover": {
+                    backgroundColor: "#6cc94e",
+                  },
+                }}
+              >
                 Ajouter
               </Button>
             </Box>
@@ -406,30 +434,31 @@ function Home() {
       {editingLocker && (
         <Modal open={true} onClose={() => setEditingLocker(null)}>
           <Box
-            className="bg-white p-8 rounded-2xl shadow-2xl"
+            className="bg-white p-10 rounded-3xl shadow-lg"
             sx={{
               position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 400,
+              width: 420,
+              maxWidth: "90vw",
               outline: "none",
             }}
           >
             <Typography
-              variant="h6"
-              className="text-center font-bold mb-4 text-gray-800"
+              variant="h5"
+              className="text-center font-semibold mb-6 text-gray-900"
             >
               Modifier Casier n°{editingLocker.number}
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
             <TextField
               select
               label="Taille"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={editingLocker.size}
               onChange={(e) => handleEditChange("size", e.target.value)}
             >
@@ -442,19 +471,56 @@ function Home() {
               type="number"
               label="Prix (€)"
               fullWidth
-              margin="normal"
+              margin="dense"
               value={editingLocker.price}
               onChange={(e) =>
                 handleEditChange("price", Number(e.target.value))
               }
+              sx={{ mt: 2 }}
             />
-            <Divider sx={{ my: 3 }} />
+                        <TextField
+              select
+              label="State"
+              fullWidth
+              margin="dense"
+              value={editingLocker.state}
+              onChange={(e) => handleEditChange("state", e.target.value)}
+            >
+              <MenuItem value="available">Disponible</MenuItem>
+              <MenuItem value="unavailable">Indisponible</MenuItem>
+            </TextField>
 
-            <Box display="flex" justifyContent="flex-end" gap={2}>
-              <Button variant="outlined" onClick={() => setEditingLocker(null)}>
+            <Divider sx={{ my: 4 }} />
+
+            <Box className="flex justify-end gap-4">
+              <Button
+                variant="outlined"
+                onClick={() => setEditingLocker(null)}
+                className="normal-case px-6"
+                sx={{
+                  borderColor: "#cbd5e1",
+                  color: "#64748b",
+                  "&:hover": {
+                    borderColor: "#94a3b8",
+                    backgroundColor: "#f1f5f9",
+                  },
+                }}
+              >
                 Annuler
               </Button>
-              <Button variant="contained" onClick={confirmEdit}>
+              <Button
+                variant="contained"
+                onClick={confirmEdit}
+                className="normal-case px-6"
+                sx={{
+                  backgroundColor: "#7ED956",
+                  color: "#fff",
+                  fontWeight: 600,
+                  "&:hover": {
+                    backgroundColor: "#6cc94e",
+                  },
+                }}
+              >
                 Confirmer
               </Button>
             </Box>
@@ -466,33 +532,56 @@ function Home() {
       {deletingLocker && (
         <Modal open={true} onClose={() => setDeletingLocker(null)}>
           <Box
-            className="bg-white p-8 rounded-2xl shadow-2xl"
+            className="bg-white p-8 rounded-3xl shadow-lg"
             sx={{
               position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: 320,
+              width: 360,
+              maxWidth: "90vw",
               outline: "none",
             }}
           >
             <Typography
-              variant="h6"
-              className="text-center font-bold mb-4 text-gray-800"
+              variant="h5"
+              className="text-center font-semibold mb-6 text-gray-900"
             >
               Supprimer Casier n°{deletingLocker.number} ?
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
-            <Box display="flex" justifyContent="center" gap={4}>
+            <Box className="flex justify-center gap-6">
               <Button
                 variant="outlined"
                 onClick={() => setDeletingLocker(null)}
+                className="normal-case px-6"
+                sx={{
+                  borderColor: "#cbd5e1",
+                  color: "#64748b",
+                  "&:hover": {
+                    borderColor: "#94a3b8",
+                    backgroundColor: "#f1f5f9",
+                  },
+                }}
               >
                 Annuler
               </Button>
-              <Button variant="contained" color="error" onClick={confirmDelete}>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={confirmDelete}
+                className="normal-case px-6"
+                sx={{
+                  backgroundColor: "#E53E3E",
+                  color: "#fff",
+                  fontWeight: 600,
+                  "&:hover": {
+                    backgroundColor: "#C53030",
+                  },
+                }}
+              >
                 Supprimer
               </Button>
             </Box>
@@ -503,70 +592,104 @@ function Home() {
       {selectedLocker && (
         <Modal open={true} onClose={() => setSelectedLocker(null)}>
           <Box
-            className="bg-white p-8 rounded-2xl shadow-2xl"
             sx={{
               position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
               width: 400,
+              bgcolor: "white",
+              borderRadius: 4,
+              boxShadow: 8,
+              p: 4,
               outline: "none",
             }}
           >
             <Typography
-              variant="h6"
-              className="text-center font-bold mb-4 text-gray-800"
+              variant="h5"
+              fontWeight="bold"
+              align="left"
+              sx={{ mb: 2, color: "#7ED956" }}
             >
-              Détails du Casier n°{selectedLocker.number}
+              Casier n°{selectedLocker.number}
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2 }} />
 
-            <Typography className="mb-2">
-              <strong>Taille :</strong> {selectedLocker.size}
-            </Typography>
-            <Typography className="mb-2">
-              <strong>Prix :</strong> {selectedLocker.price} €
-            </Typography>
-            <Typography className="mb-2">
-              <strong>Statut :</strong>{" "}
-              {getStatusLabel(getLockerState(selectedLocker))}
-            </Typography>
+            <Box sx={{ color: "#333", mb: 2 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Taille :</strong> {selectedLocker.size}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Prix :</strong> {selectedLocker.price} €
+              </Typography>
+              <Typography variant="body1" className="flex items-center gap-2">
+                <strong>Statut :</strong>
+                <span
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    getLockerState(selectedLocker) === "available"
+                      ? "bg-green-100 text-green-700"
+                      : getLockerState(selectedLocker) === "reserved"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {getStatusLabel(getLockerState(selectedLocker))}
+                </span>
+              </Typography>
+            </Box>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2 }} />
 
-            {/* Afficher les date pickers et le bouton réserver seulement si le casier est disponible */}
             {getLockerState(selectedLocker) === "available" && (
-              <>
+              <Box sx={{ mb: 2 }}>
                 <TextField
                   label="Date de début"
                   type="date"
                   fullWidth
-                  margin="normal"
+                  margin="dense"
                   InputLabelProps={{ shrink: true }}
-                  value={startDate} // tu dois créer le state startDate
+                  value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  sx={{ mb: 2 }}
                 />
-
                 <TextField
                   label="Date de fin"
                   type="date"
                   fullWidth
-                  margin="normal"
+                  margin="dense"
                   InputLabelProps={{ shrink: true }}
-                  value={endDate} // tu dois créer le state endDate
+                  value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
-              </>
+              </Box>
             )}
 
             <Box display="flex" justifyContent="flex-end" gap={1}>
               {getLockerState(selectedLocker) === "available" && (
-                <Button variant="contained" onClick={handleReserve}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: "#7ED956",
+                    color: "white",
+                    "&:hover": { bgcolor: "#6BC34A" },
+                  }}
+                  onClick={handleReserve}
+                >
                   Réserver
                 </Button>
               )}
-              <Button onClick={() => setSelectedLocker(null)}>Fermer</Button>
+              <Button
+                variant="outlined"
+                sx={{
+                  borderColor: "#7ED956",
+                  color: "#7ED956",
+                  "&:hover": { borderColor: "#6BC34A", color: "#6BC34A" },
+                }}
+                onClick={() => setSelectedLocker(null)}
+              >
+                Fermer
+              </Button>
             </Box>
           </Box>
         </Modal>
