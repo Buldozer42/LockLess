@@ -127,7 +127,6 @@ function Login() {
           bgcolor: "white",
         }}
       >
-        <Box></Box>
         <Box
           component="img"
           src={logo}
@@ -162,7 +161,7 @@ function Login() {
           <Grid container spacing={2}>
             {!isSignIn && (
               <>
-                <Grid item xs={12}>
+                <Grid item xs={12} className="w-full">
                   <TextField
                     fullWidth
                     label="Prénom"
@@ -171,7 +170,7 @@ function Login() {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} className="w-full">
                   <TextField
                     fullWidth
                     label="Nom"
@@ -182,7 +181,7 @@ function Login() {
                 </Grid>
               </>
             )}
-            <Grid item xs={12}>
+            <Grid item xs={12} className="w-full">
               <TextField
                 fullWidth
                 label="Email"
@@ -192,7 +191,7 @@ function Login() {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} className="w-full">
               <TextField
                 fullWidth
                 label="Mot de passe"
