@@ -46,7 +46,7 @@ class PaymentService {
         mode: 'payment',
         // Utiliser notre endpoint de vérification de paiement au lieu d'un webhook
         success_url: `${process.env.API_URL}/payment/success?id=${bookingId}`,
-        cancel_url: `${process.env.FRONTEND_URL}/booking/cancel?id=${bookingId}`, // Modifiez cette URL selon le frontend
+        cancel_url: `${process.env.FRONTEND_URL}/home?cancel=true&booking_id=${bookingId}`, // Modifiez cette URL selon le frontend
         customer_email: user.email,
         client_reference_id: booking._id.toString(),
         metadata: {
