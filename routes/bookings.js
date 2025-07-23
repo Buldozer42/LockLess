@@ -65,7 +65,14 @@ router.put("/:id", auth, async (req, res) => {
 
 // Supprimer une réservation
 router.delete("/:id", auth, async (req, res) => {
+  const booking = await Bookings.findById(req.params.id);
+  if (!booking) {
+    return res.status(404).json({ message: "Réservation non trouvée" });
+  }
   await Bookings.findByIdAndDelete(req.params.id);
+  await Lockers.findByIdAndUpdate(booking.lockerId, {
+    state: "available",
+  });
   res.json({ message: "Réservation supprimée" });
 });
 

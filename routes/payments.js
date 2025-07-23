@@ -40,10 +40,10 @@ router.get('/success', async (req, res) => {
       await PaymentService.handlePaymentSuccess(session);
       
       // Rediriger vers la page de confirmation
-      return res.redirect(`${process.env.FRONTEND_URL}/booking/confirmation?id=${bookingId}`);
+      return res.redirect(`${process.env.FRONTEND_URL}/home?confirmation=true&booking_id=${bookingId}`);
     } else {
       // Le paiement n'est pas encore traité ou a échoué
-      return res.redirect(`${process.env.FRONTEND_URL}/booking/pending?id=${bookingId}`);
+      return res.redirect(`${process.env.FRONTEND_URL}/home?pending=true&booking_id=${bookingId}`);
     }
   } catch (error) {
     console.error('Erreur lors de la vérification du paiement:', error);

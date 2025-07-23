@@ -22,6 +22,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Home() {
   const [lockers, setLockers] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showPending, setShowPending] = useState(false);
   const [filters, setFilters] = useState({
     taille: "",
     prix: "",
@@ -51,6 +53,44 @@ function Home() {
       .then((data) => setLockers(data))
       .catch((err) => console.error("Erreur chargement casiers", err));
   }, [navigate, token]);
+
+  // Affiche le modal de confirmation si l'URL contient ?confirmation=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('confirmation') === 'true') {
+      setShowConfirmation(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (params.get('pending') === 'true') {
+      setShowPending(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Annulation de réservation si cancel=true et booking_id présent
+    if (params.get('cancel') === 'true' && params.get('booking_id')) {
+      const bookingId = params.get('booking_id');
+      fetch(`http://localhost:3000/booking/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Erreur lors de l\'annulation de la réservation');
+          toast.success('Réservation annulée avec succès !');
+          setLockers((prev) =>
+            prev.map((locker) =>
+              locker._id === bookingId ? { ...locker, state: "available" } : locker
+            )
+          );
+        })
+        .catch(err => {
+          toast.error(err.message || 'Erreur inconnue lors de l\'annulation');
+        })
+        .finally(() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    }
+  }, [token]);
 
   const handleFilterChange = useCallback((newFilters) => {
     setFilters(newFilters);
@@ -227,6 +267,23 @@ function Home() {
       let data;
       try {
         data = await response.json();
+        const paymentResponse = await fetch(
+          `http://localhost:3000/payment/create-session/${data.booking._id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!paymentResponse.ok) {
+          throw new Error(
+            `Erreur lors de la création de la session de paiement (code: ${paymentResponse.status})`
+          );
+        }
+        const paymentData = await paymentResponse.json();
+        window.location.href = paymentData.url;
       } catch (error) {
         console.log(error);
         data = null;
@@ -239,7 +296,7 @@ function Home() {
         throw new Error(message);
       }
 
-      toast.success("Casier réservé avec succès !");
+      // toast.success("Casier réservé avec succès !");
 
       // ✅ Mettre à jour localement le locker en le passant en "reserved"
       setLockers((prevLockers) =>
@@ -366,7 +423,7 @@ function Home() {
 
             <TextField
               type="number"
-              label="Prix (€)"
+              label="Prix par jour (€)"
               fullWidth
               margin="normal"
               value={newLocker.price}
@@ -440,7 +497,7 @@ function Home() {
 
             <TextField
               type="number"
-              label="Prix (€)"
+              label="Prix par jour (€)"
               fullWidth
               margin="normal"
               value={editingLocker.price}
@@ -526,7 +583,7 @@ function Home() {
               <strong>Taille :</strong> {selectedLocker.size}
             </Typography>
             <Typography className="mb-2">
-              <strong>Prix :</strong> {selectedLocker.price} €
+              <strong>Prix par jour :</strong> {selectedLocker.price} €
             </Typography>
             <Typography className="mb-2">
               <strong>Statut :</strong>{" "}
@@ -567,6 +624,68 @@ function Home() {
                 </Button>
               )}
               <Button onClick={() => setSelectedLocker(null)}>Fermer</Button>
+            </Box>
+          </Box>
+        </Modal>
+      )}
+      {/* Modal confirmation réservation */}
+      {showConfirmation && (
+        <Modal open={true} onClose={() => setShowConfirmation(false)}>
+          <Box
+            className="bg-white p-8 rounded-2xl shadow-2xl"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              outline: "none",
+            }}
+          >
+            <Typography
+              variant="h6"
+              className="text-center font-bold mb-4 text-green-700"
+            >
+              Réservation acceptée !
+            </Typography>
+            <Typography className="mb-4 text-center">
+              Votre réservation a bien été prise en compte.
+            </Typography>
+            <Box display="flex" justifyContent="center">
+              <Button variant="contained" onClick={() => setShowConfirmation(false)}>
+                OK
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+      )}
+      {/* Modal échec réservation */}
+      {showPending && (
+        <Modal open={true} onClose={() => setShowPending(false)}>
+          <Box
+            className="bg-white p-8 rounded-2xl shadow-2xl"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              outline: "none",
+            }}
+          >
+            <Typography
+              variant="h6"
+              className="text-center font-bold mb-4 text-red-700"
+            >
+              Réservation échouée
+            </Typography>
+            <Typography className="mb-4 text-center">
+              Une erreur est survenue lors de la réservation. Veuillez réessayer ou contacter le support.
+            </Typography>
+            <Box display="flex" justifyContent="center">
+              <Button variant="contained" color="error" onClick={() => setShowPending(false)}>
+                OK
+              </Button>
             </Box>
           </Box>
         </Modal>
