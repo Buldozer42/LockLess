@@ -17,7 +17,7 @@ function Filter({ onFilterChange }) {
     }, [size, price, status, number, onFilterChange]);
 
     return (
-        <div className="flex flex-wrap gap-4 p-4 bg-white rounded-md shadow mb-6">
+        <div className="flex flex-wrap gap-4 p-4 bg-white rounded-md shadow mb-6 bg-[#FDFFEF]">
             <select
                 className="border rounded px-4 py-2"
                 value={size}
