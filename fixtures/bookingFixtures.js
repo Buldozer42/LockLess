@@ -31,25 +31,25 @@ async function loadBookingFixtures() {
     const bookings = [
       {
         ownerId: users[0]._id, // John Doe
-        lockerId: lockers.find(l => l.number === 'A001')._id,
+        lockerId: lockers.find(l => l.number === '1')._id,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5), // 5 jours avant aujourd'hui
         endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5)    // 5 jours après aujourd'hui
       },
       {
         ownerId: users[1]._id, // Jane Smith
-        lockerId: lockers.find(l => l.number === 'B001')._id,
+        lockerId: lockers.find(l => l.number === '2')._id,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),     // Aujourd'hui
         endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 10)   // 10 jours après aujourd'hui
       },
       {
         ownerId: users[3]._id, // Marie Dupont
-        lockerId: lockers.find(l => l.number === 'C001')._id,
+        lockerId: lockers.find(l => l.number === '3')._id,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2), // 2 jours après aujourd'hui
         endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7)    // 7 jours après aujourd'hui
       },
       {
         ownerId: users[2]._id, // Admin
-        lockerId: lockers.find(l => l.number === 'B002')._id,
+        lockerId: lockers.find(l => l.number === '4')._id,
         startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 10), // 10 jours avant aujourd'hui
         endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2)     // 2 jours avant aujourd'hui (réservation passée)
       }

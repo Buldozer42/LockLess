@@ -448,20 +448,6 @@ function Home() {
                 handleEditChange("price", Number(e.target.value))
               }
             />
-
-            <TextField
-              select
-              label="Statut"
-              fullWidth
-              margin="normal"
-              value={editingLocker.state}
-              onChange={(e) => handleEditChange("state", e.target.value)}
-            >
-              <MenuItem value="available">Disponible</MenuItem>
-              <MenuItem value="reserved">Réservé</MenuItem>
-              <MenuItem value="unavailable">Indisponible</MenuItem>
-            </TextField>
-
             <Divider sx={{ my: 3 }} />
 
             <Box display="flex" justifyContent="flex-end" gap={2}>

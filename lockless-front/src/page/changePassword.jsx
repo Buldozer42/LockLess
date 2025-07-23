@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Container,
+  Paper,
   Typography,
   TextField,
   Button,
@@ -10,6 +11,7 @@ import {
   Link,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
+import logo from '../assets/LockLess__1_-removebg-preview.png';
 
 function ChangePassword() {
   const { token } = useParams(); // récupérer le token de l'URL

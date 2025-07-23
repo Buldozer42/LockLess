@@ -7,7 +7,6 @@ function SideDrawer({ isOpen, onClose, content }) {
   const [user, setUser] = useState(null);
   const [userBooking, setUserBooking] = useState([]);
   const token = localStorage.getItem("token");
-  console.log(token);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -24,7 +23,7 @@ function SideDrawer({ isOpen, onClose, content }) {
 
   const getUserBookings = async () => {
     try {
-      const raw = await fetch("http://localhost:3000/booking/me", {
+      const raw = await fetch("http://localhost:3000/booking/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -54,6 +53,7 @@ function SideDrawer({ isOpen, onClose, content }) {
     return "en cours";
   };
 
+  
   const handleCancel = async (bookingId) => {
     try {
       // Appel API pour annuler la réservation
@@ -70,6 +70,7 @@ function SideDrawer({ isOpen, onClose, content }) {
       console.error("Erreur lors de l'annulation :", error);
     }
   };
+
 
   return (
     <Drawer anchor="right" open={isOpen} onClose={onClose}>
@@ -109,7 +110,7 @@ function SideDrawer({ isOpen, onClose, content }) {
               Réservations
             </Typography>
             {userBooking.length > 0 ? (
-              <ul className="w-full space-y-2 cursor-pointer">
+              <ul className="w-full space-y-2">
                 {userBooking.map((resa) => {
                   const statut = getBookingStatus(resa.startDate, resa.endDate);
 
@@ -135,10 +136,20 @@ function SideDrawer({ isOpen, onClose, content }) {
                         </span>
                       </div>
                       <Typography variant="caption" className="text-gray-600">
-                        Du {new Date(resa.startDate).toLocaleDateString()} au{" "}
-                        {new Date(resa.endDate).toLocaleDateString()}
+                        Du{" "}
+                        {new Date(resa.startDate).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}{" "}
+                        au{" "}
+                        {new Date(resa.endDate).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
                       </Typography>
-                      {(statut === "planifiée" || statut === "en cours") && (
+                                            {(statut === "planifiée" || statut === "en cours") && (
                         <button
                           onClick={() => handleCancel(resa._id)}
                           className="flex text-xs text-red-600 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 transition ml-auto mt-2"

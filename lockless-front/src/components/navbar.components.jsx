@@ -1,24 +1,39 @@
 import { useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import SideDrawer from "./sidedrawer.components";
+import SideBookingDrawer from "./sideBookingDrawer.component";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/LockLess__1_-removebg-preview.png";
 import { Box, IconButton } from "@mui/material";
 
 function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerBookingOpen, setIsDrawerBookingOpen] = useState(false);
   const [drawerContent, setDrawerContent] = useState("");
+  const [drawerBookingContent, setDrawerBookingContent] = useState("");
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const openDrawer = (content) => {
     setDrawerContent(content);
     setIsDrawerOpen(true);
   };
 
+  const openDrawerBooking = (content) => {
+    setDrawerBookingContent(content);
+    setIsDrawerBookingOpen(true);
+  };
+
   const closeDrawer = () => {
     setIsDrawerOpen(false);
     setDrawerContent("");
+  };
+
+  const closeDrawerBooking = () => {
+    setIsDrawerBookingOpen(false);
+    setDrawerBookingContent("");
   };
 
   const handleLogout = () => {
@@ -49,6 +64,11 @@ function Navbar() {
             Lockless
           </div>
           <div className="flex space-x-4">
+            {user?.roles?.includes("admin") && (
+              <IconButton onClick={() => openDrawerBooking("account")}>
+                <LibraryBooksIcon className="text-white" />
+              </IconButton>
+            )}
             <IconButton onClick={() => openDrawer("account")}>
               <AccountCircleIcon className="text-white" />
             </IconButton>
@@ -63,6 +83,11 @@ function Navbar() {
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
         content={drawerContent}
+      />
+      <SideBookingDrawer
+        isOpen={isDrawerBookingOpen}
+        onClose={closeDrawerBooking}
+        content={drawerBookingContent}
       />
     </>
   );
