@@ -2,7 +2,7 @@ const express = require('express');
 const auth = require('../middlewares/auth');
 const router = express.Router();
 const Lockers = require('../entity/locker');
-
+const Bookings = require('../entity/booking')
 // Créer un locker
 router.post('/', auth, async (req, res) => {
     try {
@@ -25,12 +25,46 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
+// Récupérer tous les lockers avec mise à jour dynamique du statut
+router.get('/', auth, async (req, res) => {
+    try {
+        const lockers = await Lockers.find();
+        const now = new Date();
 
-// Récupérer tous les lockers
-router.get('/',auth, async (req, res) => {
-    const lockers = await Lockers.find();
-    res.json(lockers);
+        await Promise.all(lockers.map(async (locker) => {
+            
+            // On récupère la dernière réservation de ce casier
+            const latestBooking = await Bookings.findOne({ lockerId: locker._id })
+                .sort({ endDate: -1 });
+
+            // Si une réservation existe
+            if (latestBooking) {
+                const isFinished = latestBooking.endDate < now;
+
+                // Si la réservation est finie ET que le casier n'est pas dispo
+                if (isFinished && locker.state !== 'available') {
+                    locker.state = 'available';
+                    await locker.save();
+                }
+
+            } else {
+                // Aucun booking : on s'assure que le casier est dispo
+                if (locker.state !== 'available') {
+                    locker.state = 'available';
+                    await locker.save();
+                }
+            }
+        }));
+
+        // Retour des casiers mis à jour
+        const updatedLockers = await Lockers.find();
+        res.json(updatedLockers);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des lockers :', error);
+        res.status(500).json({ error: 'Erreur serveur', details: error.message });
+    }
 });
+
 
 // Récupérer un locker
 router.get('/:id',auth, async (req, res) => {
