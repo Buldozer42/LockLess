@@ -3,6 +3,7 @@ const auth = require('../middlewares/auth');
 const router = express.Router();
 const Lockers = require('../entity/locker');
 const Bookings = require('../entity/booking')
+const MailService = require('../service/mailService');
 // Créer un locker
 router.post('/', auth, async (req, res) => {
     try {
@@ -35,7 +36,8 @@ router.get('/', auth, async (req, res) => {
             
             // On récupère la dernière réservation de ce casier
             const latestBooking = await Bookings.findOne({ lockerId: locker._id })
-                .sort({ endDate: -1 });
+                .sort({ endDate: -1 })
+                .populate("lockerId ownerId");
 
             // Si une réservation existe
             if (latestBooking) {
@@ -44,6 +46,10 @@ router.get('/', auth, async (req, res) => {
                 // Si la réservation est finie ET que le casier n'est pas dispo
                 if (isFinished && locker.state !== 'available') {
                     locker.state = 'available';
+                    await MailService.sendEndReservationEmail(
+                        latestBooking.ownerId.email,
+                        latestBooking
+                    );
                     await locker.save();
                 }
 

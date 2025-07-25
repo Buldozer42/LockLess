@@ -4,8 +4,8 @@ const auth = require("../middlewares/auth");
 const Bookings = require("../entity/booking");
 const LoginService = require('../service/loginService');
 // Créer une réservation
-const Lockers = require("../entity/locker"); // N'oublie pas d'importer
-const User = require("../entity/user");
+const Lockers = require("../entity/locker");
+const MailService = require("../service/mailService");
 
 router.post("/", auth, async (req, res) => {
   try {
@@ -72,10 +72,14 @@ router.put("/:id", auth, async (req, res) => {
 // Supprimer une réservation
 // Supprimer une réservation et libérer le casier
 router.delete("/:id", auth, async (req, res) => {
-  const booking = await Bookings.findById(req.params.id);
+  const booking = await Bookings.findById(req.params.id).populate("lockerId ownerId");
   if (!booking) {
     return res.status(404).json({ message: "Réservation non trouvée" });
   }
+  await MailService.sendEndReservationEmail(
+      booking.ownerId.email,
+      booking
+  );
   await Bookings.findByIdAndDelete(req.params.id);
   await Lockers.findByIdAndUpdate(booking.lockerId, {
     state: "available",

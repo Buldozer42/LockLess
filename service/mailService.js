@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const Booking = require('../entity/booking');
 
 /**
  * Configuration du transporteur pour l'envoi d'emails
@@ -69,7 +70,8 @@ const MailService = {
    * @param {string} title - Titre de la notification
    * @param {string} message - Message de la notification
    * @returns {Promise} - Promise contenant le résultat de l'envoi
-   */  sendNotification: async (email, title, message) => {
+   */
+  sendNotification: async (email, title, message) => {
     const subject = `LockLess - ${title}`;
     const text = `${message}\n\nCordialement,\nL'équipe LockLess`;
     const html = `
@@ -131,6 +133,58 @@ const MailService = {
       <p>Cordialement,<br>L'équipe LockLess</p>
     `;
 
+    return MailService.sendEmail(email, subject, text, html);
+  },
+  
+  /**
+   * Envoie un email de confirmation de réservation
+   * @param {string} email - Adresse email de l'utilisateur
+   * @param {Bookings} booking - Instance de Booking
+   * @returns {Promise} - Promise contenant le résultat de l'envoi
+   */
+  sendConfirmReservationEmail: async (email, booking) => {
+    const subject = 'Confirmation de votre réservation LockLess';
+    const bookingDetails = `
+      Réservation #${booking.id}
+      Date début: ${booking.startDate}
+      Date fin: ${booking.endDate}
+      Casier: ${booking.lockerId.number}
+    `;
+    const text = `Bonjour,\n\nVotre réservation a été confirmée avec les détails suivants :\n\n${bookingDetails}\n\nMerci de votre confiance.\n\nCordialement,\nL'équipe LockLess`;
+    const html = `
+      <h1>Confirmation de votre réservation LockLess</h1>
+      <p>Bonjour,</p>
+      <p>Votre réservation a été confirmée avec les détails suivants :</p>
+      <pre>${bookingDetails}</pre>
+      <p>Merci de votre confiance.</p>
+      <p>Cordialement,<br>L'équipe LockLess</p>
+    `;
+    return MailService.sendEmail(email, subject, text, html);
+  },
+
+  /**
+   * Envoie un email de fin de réservation
+   * @param {string} email - Adresse email de l'utilisateur
+   * @param {Bookings} booking - Instance de Booking
+   * @returns {Promise} - Promise contenant le résultat de l'envoi
+   */
+  sendEndReservationEmail: async (email, booking) => {
+    const subject = 'Fin de votre réservation LockLess';
+    const bookingDetails = `
+      Réservation #${booking.id}
+      Date début: ${booking.startDate}
+      Date fin: ${booking.endDate}
+      Casier: ${booking.lockerId.number}
+    `;
+    const text = `Bonjour,\n\nVotre réservation est terminée. Voici les détails de votre réservation :\n\n${bookingDetails}\n\nMerci d'avoir utilisé LockLess.\n\nCordialement,\nL'équipe LockLess`;
+    const html = `
+      <h1>Fin de votre réservation LockLess</h1>
+      <p>Bonjour,</p>
+      <p>Votre réservation est terminée. Voici les détails de votre réservation :</p>
+      <pre>${bookingDetails}</pre>
+      <p>Merci d'avoir utilisé LockLess.</p>
+      <p>Cordialement,<br>L'équipe LockLess</p>
+    `;
     return MailService.sendEmail(email, subject, text, html);
   }
 };

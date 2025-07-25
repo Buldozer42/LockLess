@@ -2,6 +2,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Booking = require('../entity/booking');
 const Locker = require('../entity/locker');
 const User = require('../entity/user');
+const MailService = require('../service/mailService');
 
 class PaymentService {
   /**
@@ -76,7 +77,10 @@ class PaymentService {
   static async handlePaymentSuccess(session) {
     try {
       const bookingId = session.metadata.bookingId;
-      const booking = await Booking.findById(bookingId);
+      const booking = await Booking.findById(bookingId)
+        .populate('lockerId')
+        .populate('ownerId')
+      ;
 
       if (!booking) {
         console.error(`Réservation introuvable: ${bookingId}`);
@@ -90,7 +94,11 @@ class PaymentService {
 
       // Mettre à jour l'état du casier à 'reserved'
       await Locker.findByIdAndUpdate(booking.lockerId, { state: 'reserved' });
-
+      // Envoyer un email de confirmation
+      await MailService.sendConfirmReservationEmail(
+        booking.ownerId.email,
+        booking
+      );
       console.log(`Paiement réussi pour la réservation ${bookingId}`);
     } catch (error) {
       console.error('Erreur lors du traitement du paiement réussi:', error);
