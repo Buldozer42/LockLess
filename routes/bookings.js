@@ -13,7 +13,7 @@ router.post("/", auth, async (req, res) => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     
-    if (booking.startDate < now || booking.endDate <= booking.startDate ) {
+    if (booking.startDate < now || booking.endDate <= booking.startDate) {
       return res.status(400).json({ message: "La réservation ne peut pas être dans le passé ou pour le jour même." });
     }
 

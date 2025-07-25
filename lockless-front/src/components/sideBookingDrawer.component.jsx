@@ -39,7 +39,6 @@ function SideDrawer({ isOpen, onClose, content, onBookingChange }) {
       }
 
       const response = await raw.json();
-      console.log(response);
       setUserBooking(response);
     } catch (error) {
       console.error("Erreur lors de la récupération des réservations :", error);
