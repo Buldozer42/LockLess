@@ -14,28 +14,28 @@ import logo from "../assets/LockLess__1_-removebg-preview.png";
 
 function Login() {
   const [isSignIn, setIsSignIn] = useState(true);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState(initialFormData(true));
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
+  function initialFormData(signIn = true) {
+    return signIn
+      ? { email: "", password: "" }
+      : { firstName: "", lastName: "", email: "", password: "" };
+  }
+
   const toggleScreen = () => {
-    setIsSignIn(!isSignIn);
+    setIsSignIn((prev) => !prev);
+    setFormData(initialFormData(!isSignIn));
     setError("");
     setSuccess("");
   };
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -96,7 +96,9 @@ function Login() {
 
         if (response.ok) {
           setSuccess("Inscription réussie !");
-          console.log("User:", data?.user);
+          localStorage.setItem("token", data?.token);
+          localStorage.setItem("user", JSON.stringify(data?.user));
+          navigate("/home");
         } else {
           setError(data?.error || "Erreur lors de l'inscription");
         }
@@ -146,16 +148,8 @@ function Login() {
           {isSignIn ? "Connexion" : "Inscription"}
         </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        {success && (
-          <Alert severity="success" sx={{ mt: 2 }}>
-            {success}
-          </Alert>
-        )}
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
