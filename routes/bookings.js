@@ -10,6 +10,12 @@ const User = require("../entity/user");
 router.post("/", auth, async (req, res) => {
   try {
     const booking = await Bookings.create(req.body);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (booking.startDate < now || booking.endDate <= now) {
+      return res.status(400).json({ message: "La réservation ne peut pas être dans le passé." });
+    }
 
     if (booking) {
       // Mettre à jour le locker concerné
