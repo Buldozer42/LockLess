@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { Drawer, Box, Typography, Avatar, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-function SideDrawer({ isOpen, onClose, content }) {
+function SideDrawer({ isOpen, onClose, content, onBookingChange }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [userBooking, setUserBooking] = useState([]);
   const token = localStorage.getItem("token");
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    getUsers();
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const userObj = JSON.parse(storedUser);
@@ -53,7 +56,27 @@ function SideDrawer({ isOpen, onClose, content }) {
     return "en cours";
   };
 
-  
+  const getUsers = async () => {
+    try {
+      const raw = await fetch("http://localhost:3000/user/getUsers", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!raw.ok) {
+        throw new Error(`Erreur serveur : ${raw.status}`);
+      }
+
+      const response = await raw.json();
+      setUsers(response);
+    } catch (error) {
+      toast.error("Erreur dans la récupérations des utilisateurs :", error);
+    }
+  };
+
   const handleCancel = async (bookingId) => {
     try {
       // Appel API pour annuler la réservation
@@ -66,11 +89,11 @@ function SideDrawer({ isOpen, onClose, content }) {
       });
       // Mettre à jour la liste localement
       setUserBooking((prev) => prev.filter((b) => b._id !== bookingId));
+      onBookingChange();
     } catch (error) {
       console.error("Erreur lors de l'annulation :", error);
     }
   };
-
 
   return (
     <Drawer anchor="right" open={isOpen} onClose={onClose}>
@@ -113,7 +136,9 @@ function SideDrawer({ isOpen, onClose, content }) {
               <ul className="w-full space-y-2">
                 {userBooking.map((resa) => {
                   const statut = getBookingStatus(resa.startDate, resa.endDate);
-
+                  const bookingOwner = resa.ownerId
+                    ? users.find((u) => u._id === resa.ownerId._id)
+                    : null;
                   return (
                     <li
                       key={resa.id || resa._id} // ⚠️ Prend _id si pas de id
@@ -126,7 +151,7 @@ function SideDrawer({ isOpen, onClose, content }) {
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             statut === "en cours"
-                              ? "bg-green-100 text-green-700"
+                              ? "5 text-green-700"
                               : statut === "planifiée"
                               ? "bg-blue-100 text-blue-700"
                               : "bg-gray-200 text-gray-600"
@@ -149,14 +174,24 @@ function SideDrawer({ isOpen, onClose, content }) {
                           year: "numeric",
                         })}
                       </Typography>
-                                            {(statut === "planifiée" || statut === "en cours") && (
-                        <button
-                          onClick={() => handleCancel(resa._id)}
-                          className="flex text-xs text-red-600 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 transition ml-auto mt-2"
-                        >
-                          Annuler
-                        </button>
-                      )}
+                      <div className="flex"> 
+                        {bookingOwner && (
+                          <Typography
+                            variant="caption"
+                            className="flex text-xs text-red-600 m-auto"
+                          >
+                            <p className="m-auto mt-2 font-bold">{bookingOwner.firstName[0].toUpperCase()}{bookingOwner.firstName.slice(1, bookingOwner.firstName.length)}</p>
+                          </Typography>
+                        )}
+                        {(statut === "planifiée" || statut === "en cours") && (
+                          <button
+                            onClick={() => handleCancel(resa._id)}
+                            className="flex text-xs text-red-600 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 transition ml-auto mt-2"
+                          >
+                            Annuler
+                          </button>
+                        )}
+                      </div>
                     </li>
                   );
                 })}

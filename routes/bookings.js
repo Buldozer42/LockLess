@@ -64,6 +64,7 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 // Supprimer une réservation
+// Supprimer une réservation et libérer le casier
 router.delete("/:id", auth, async (req, res) => {
   const booking = await Bookings.findById(req.params.id);
   if (!booking) {
@@ -75,5 +76,6 @@ router.delete("/:id", auth, async (req, res) => {
   });
   res.json({ message: "Réservation supprimée" });
 });
+
 
 module.exports = router;
