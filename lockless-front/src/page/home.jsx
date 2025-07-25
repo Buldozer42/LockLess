@@ -245,10 +245,21 @@ function Home() {
   };
 
   const handleReserve = async () => {
-  if (!startDate || !endDate) {
-    toast.error("Veuillez choisir les deux dates");
-    return;
-  }
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // normalise à minuit pour comparaison sans heure
+
+    if (!startDate || !endDate) {
+      toast.error("Veuillez choisir les deux dates");
+      return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (start < now || end <= start) {
+      toast.error("La date de début ne peut être antérieure à aujourd'hui et la fin doit être après le début.");
+      return;
+    }
 
   try {
     const response = await fetch("http://localhost:3000/booking/", {

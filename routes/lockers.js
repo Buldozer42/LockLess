@@ -26,24 +26,21 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// Récupérer tous les lockers avec mise à jour dynamique du statut
 router.get('/', auth, async (req, res) => {
     try {
         const lockers = await Lockers.find();
         const now = new Date();
+        now.setHours(0, 0, 0, 0);
 
         await Promise.all(lockers.map(async (locker) => {
             
-            // On récupère la dernière réservation de ce casier
             const latestBooking = await Bookings.findOne({ lockerId: locker._id })
                 .sort({ endDate: -1 })
                 .populate("lockerId ownerId");
 
-            // Si une réservation existe
             if (latestBooking) {
-                const isFinished = latestBooking.endDate < now;
+                const isFinished = latestBooking.endDate <= now;
 
-                // Si la réservation est finie ET que le casier n'est pas dispo
                 if (isFinished && locker.state !== 'available') {
                     locker.state = 'available';
                     await MailService.sendEndReservationEmail(
@@ -54,7 +51,6 @@ router.get('/', auth, async (req, res) => {
                 }
 
             } else {
-                // Aucun booking : on s'assure que le casier est dispo
                 if (locker.state !== 'available') {
                     locker.state = 'available';
                     await locker.save();
@@ -62,7 +58,6 @@ router.get('/', auth, async (req, res) => {
             }
         }));
 
-        // Retour des casiers mis à jour
         const updatedLockers = await Lockers.find();
         res.json(updatedLockers);
     } catch (error) {
@@ -71,20 +66,16 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-
-// Récupérer un locker
 router.get('/:id',auth, async (req, res) => {
     const locker = await Lockers.findById(req.params.id);
     res.json(locker);
 });
 
-// Modifier un locker
 router.put('/:id',auth, async (req, res) => {
     const locker = await Lockers.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(locker);
 });
 
-// Supprimer un locker
 router.delete('/:id',auth, async (req, res) => {
     await Lockers.findByIdAndDelete(req.params.id);
     res.json({ message: 'Lockers supprimé' });

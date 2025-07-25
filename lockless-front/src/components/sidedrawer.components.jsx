@@ -7,7 +7,6 @@ function SideDrawer({ isOpen, onClose, content, lockers, onBookingChange }) {
   const [user, setUser] = useState(null);
   const [userBooking, setUserBooking] = useState([]);
   const token = localStorage.getItem("token");
-  console.log(token);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -37,7 +36,6 @@ function SideDrawer({ isOpen, onClose, content, lockers, onBookingChange }) {
       }
 
       const response = await raw.json();
-      console.log(response);
       setUserBooking(response);
     } catch (error) {
       console.error("Erreur lors de la récupération des réservations :", error);
