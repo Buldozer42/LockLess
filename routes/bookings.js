@@ -12,9 +12,9 @@ router.post("/", auth, async (req, res) => {
     const booking = await Bookings.create(req.body);
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-
-    if (booking.startDate < now || booking.endDate <= now) {
-      return res.status(400).json({ message: "La réservation ne peut pas être dans le passé." });
+    
+    if (booking.startDate < now || booking.endDate <= booking.startDate ) {
+      return res.status(400).json({ message: "La réservation ne peut pas être dans le passé ou pour le jour même." });
     }
 
     if (booking) {
