@@ -245,77 +245,73 @@ function Home() {
   };
 
   const handleReserve = async () => {
-    if (!startDate || !endDate) {
-      toast.error("Veuillez choisir les deux dates");
-      return;
+  if (!startDate || !endDate) {
+    toast.error("Veuillez choisir les deux dates");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:3000/booking/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        lockerId: selectedLocker._id,
+        ownerId: user?._id,
+        startDate,
+        endDate,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const message =
+        data?.message || `Erreur lors de la réservation (code: ${response.status})`;
+      throw new Error(message);
     }
 
-    try {
-      const response = await fetch("http://localhost:3000/booking/", {
+    const paymentResponse = await fetch(
+      `http://localhost:3000/payment/create-session/${data.booking._id}`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          lockerId: selectedLocker._id,
-          ownerId: user?._id,
-          startDate,
-          endDate,
-        }),
-      });
-
-      let data;
-      try {
-        data = await response.json();
-        const paymentResponse = await fetch(
-          `http://localhost:3000/payment/create-session/${data.booking._id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!paymentResponse.ok) {
-          throw new Error(
-            `Erreur lors de la création de la session de paiement (code: ${paymentResponse.status})`
-          );
-        }
-        const paymentData = await paymentResponse.json();
-        window.location.href = paymentData.url;
-      } catch (error) {
-        console.log(error);
-        data = null;
       }
+    );
 
-      if (!response.ok) {
-        const message =
-          data?.message ||
-          `Erreur lors de la réservation (code: ${response.status})`;
-        throw new Error(message);
-      }
-
-      // toast.success("Casier réservé avec succès !");
-
-      // ✅ Mettre à jour localement le locker en le passant en "reserved"
-      setLockers((prevLockers) =>
-        prevLockers.map((locker) =>
-          locker._id === selectedLocker._id
-            ? { ...locker, state: "reserved" }
-            : locker
-        )
-      );
-
-      // Réinitialiser
-      setStartDate("");
-      setEndDate("");
-      setSelectedLocker(null);
-    } catch (error) {
-      toast.error(error.message || "Erreur inconnue lors de la réservation");
+    if (!paymentResponse.ok) {
+      const paymentData = await paymentResponse.json().catch(() => null);
+      const message =
+        paymentData?.message ||
+        `Erreur lors de la création de la session de paiement (code: ${paymentResponse.status})`;
+      throw new Error(message);
     }
-  };
+
+    const paymentData = await paymentResponse.json();
+    window.location.href = paymentData.url;
+
+    setLockers((prevLockers) =>
+      prevLockers.map((locker) =>
+        locker._id === selectedLocker._id
+          ? { ...locker, state: "reserved" }
+          : locker
+      )
+    );
+
+    // Réinitialiser
+    setStartDate("");
+    setEndDate("");
+    setSelectedLocker(null);
+  } catch (error) {
+    toast.error(error.message || "Erreur inconnue lors de la réservation");
+  }
+};
+
 
   return (
     <>
